@@ -1,6 +1,3 @@
-// ============================================================
-//  CONFIGURAÇÃO CENTRAL — mexa só aqui se algo mudar
-// ============================================================
 window.APP = {
   url: 'https://byycxurjjonbhrreoost.supabase.co',
   key: 'sb_publishable_CyvZ6fSv-rnd3tc_KhoVhg_jWxTrWOj',
@@ -10,28 +7,14 @@ window.APP = {
     profiles:   'profiles',
     categories: 'categories',
   },
-  buckets: {
-    images: 'img_comidas',
-  },
+  buckets: { images: 'img_comidas' },
 };
 
 window.sb = window.supabase.createClient(APP.url, APP.key);
 window.$ = id => document.getElementById(id);
-window.esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({
-  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-}[c]));
-
-window.imgUrl = path =>
-  sb.storage.from(APP.buckets.images).getPublicUrl(path).data.publicUrl;
-
+window.esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+window.imgUrl = path => sb.storage.from(APP.buckets.images).getPublicUrl(path).data.publicUrl;
 window.avatarUrl = (userId, bust) => {
   const u = imgUrl(`avatars/${userId}.jpg`);
   return bust ? `${u}?t=${bust}` : u;
 };
-
-console.info(
-  '%c FoodCritic Lite ',
-  'background:#ff5a36;color:#fff;padding:2px 6px;border-radius:4px;',
-  `projeto: ${APP.url}`,
-  `| bucket: ${APP.buckets.images}`
-);
