@@ -2,43 +2,58 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Criar Conta - FoodCritic</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#6B2737">
+  <title>Criar conta · FoodCritic Fácil</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍝%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800;9..144,900&family=Nunito+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/flow.css">
 </head>
 <body class="login-page">
-  <div id="toast-container" class="toast-container"></div>
-  <div class="login-container">
+  <div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
+
+  <main class="login-container">
     <div class="login-hero">
-      <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80" alt="Comida">
+      <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80" alt="" width="800" height="200">
       <div class="login-hero-overlay"></div>
     </div>
     <div class="login-content">
       <h1 class="login-logo">Food<span>Critic</span></h1>
       <h2 class="login-title">Crie sua conta.</h2>
       <p class="login-subtitle">Comece a pedir agora.</p>
-      <div class="login-form">
+
+      <form id="register-form" class="login-form" novalidate>
         <div class="input-icon-group">
-          <i class="far fa-user"></i>
-          <input type="text" id="reg-name" placeholder="Seu nome">
+          <label class="sr-only" for="reg-name">Nome</label>
+          <i class="far fa-user" aria-hidden="true"></i>
+          <input type="text" id="reg-name" placeholder="Seu nome" autocomplete="name" required>
         </div>
         <div class="input-icon-group">
-          <i class="far fa-envelope"></i>
-          <input type="email" id="reg-email" placeholder="Seu e-mail">
+          <label class="sr-only" for="reg-email">E-mail</label>
+          <i class="far fa-envelope" aria-hidden="true"></i>
+          <input type="email" id="reg-email" placeholder="Seu e-mail" autocomplete="email" inputmode="email" required>
         </div>
         <div class="input-icon-group">
-          <i class="fas fa-lock"></i>
-          <input type="password" id="reg-password" placeholder="Crie uma senha (mín. 6)">
+          <label class="sr-only" for="reg-password">Senha</label>
+          <i class="fas fa-lock" aria-hidden="true"></i>
+          <input type="password" id="reg-password" placeholder="Crie uma senha (mín. 6)" autocomplete="new-password" minlength="6" required>
+          <button type="button" class="pw-toggle" data-pw-toggle aria-label="Mostrar senha" aria-pressed="false">
+            <i class="far fa-eye" aria-hidden="true"></i>
+          </button>
         </div>
-        <button class="btn-auth-primary" onclick="fazerCadastro()">Criar conta</button>
-      </div>
+        <button type="submit" class="btn-auth-primary">Criar conta</button>
+      </form>
+
       <p class="login-footer">Já tem conta? <a href="login.html">Entrar</a></p>
     </div>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js"></script>
-  <script src="js/auth.js"></script>
+  </main>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="js/config.js"></script>
+  <script defer src="js/auth.js"></script>
 </body>
 </html>

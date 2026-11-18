@@ -2,79 +2,100 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#6B2737">
   <title>FoodCritic Fácil</title>
-  
-  <!-- Fontes -->
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍝%3C/text%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://byycxurjjonbhrreoost.supabase.co" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800;9..144,900&family=Nunito+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-  
-  <!-- MAPA (Leaflet) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/lite.css">
+  <link rel="stylesheet" href="css/flow.css">
 </head>
-<body>
-  <div id="toast-container" class="toast-container"></div>
+<body class="is-booting">
+  <div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
 
   <div class="app-layout">
-    <!-- Sidebar Esquerda -->
-    <aside class="sidebar-left">
-      <h1 class="logo-sidebar">FoodCritic</h1>
+    <!-- Menu lateral (desktop) -->
+    <aside class="sidebar-left" aria-label="Menu principal">
+      <p class="logo-sidebar">FoodCritic</p>
       <nav class="nav-menu">
-        <button class="nav-btn active" data-nav="inicio" onclick="go('inicio')">
-          <i class="fas fa-home"></i> <span>Início</span>
+        <button type="button" class="nav-btn active" data-nav="inicio" data-go="inicio">
+          <i class="fas fa-home" aria-hidden="true"></i> <span>Início</span>
         </button>
-        <button class="nav-btn" data-nav="carrinho" onclick="go('carrinho')">
-          <i class="fas fa-shopping-bag"></i> <span>Carrinho</span>
+        <button type="button" class="nav-btn" data-nav="carrinho" data-go="carrinho">
+          <i class="fas fa-shopping-bag" aria-hidden="true"></i> <span>Carrinho</span>
           <span id="cart-badge-sidebar" class="badge" hidden>0</span>
         </button>
-        <button class="nav-btn" data-nav="pedido" onclick="go('pedido')">
-          <i class="fas fa-receipt"></i> <span>Meu Pedido</span>
+        <button type="button" class="nav-btn" data-nav="pedido" data-go="pedido">
+          <i class="fas fa-receipt" aria-hidden="true"></i> <span>Meu Pedido</span>
+        </button>
+        <button type="button" class="nav-btn" data-nav="cadastrar" data-go="cadastrar">
+          <i class="fas fa-plus-circle" aria-hidden="true"></i> <span>Nova Loja</span>
         </button>
       </nav>
-        <!-- Adicione dentro da <nav class="nav-menu"> da sidebar-esquerda: -->
-        <button class="nav-btn" data-nav="cadastrar" onclick="go('cadastrar')">
-        <i class="fas fa-plus-circle"></i> <span>Nova Loja</span>
-        </button>
-      <button class="btn-logout-sidebar" onclick="logout()">
-        <i class="fas fa-sign-out-alt"></i> <span>Sair</span>
+      <button type="button" class="btn-logout-sidebar" data-action="logout">
+        <i class="fas fa-sign-out-alt" aria-hidden="true"></i> <span>Sair</span>
       </button>
     </aside>
 
-    <!-- Conteúdo Central -->
+    <!-- Conteúdo -->
     <main class="main-content">
-      <div id="view-content"></div>
+      <div id="view-content">
+        <noscript><p class="empty-inline">Ative o JavaScript para usar o FoodCritic Fácil.</p></noscript>
+      </div>
     </main>
 
-    <!-- Sidebar Direita (Carrinho) -->
-    <aside class="sidebar-right">
+    <!-- Resumo (desktop) -->
+    <aside class="sidebar-right" aria-label="Resumo">
       <div id="sidebar-right-content"></div>
     </aside>
   </div>
 
-  <!-- Bottom Nav (Mobile) -->
-  <nav class="bottom-nav">
-    <button class="nav-btn active" data-nav="inicio" onclick="go('inicio')">
-      <i class="fas fa-home"></i><span>Início</span>
+  <!-- Carrinho flutuante (mobile) -->
+  <button type="button" id="cart-bar" class="cart-bar" data-action="open-cart" hidden>
+    <span class="cart-bar-count" aria-hidden="true">0</span>
+    <span class="cart-bar-label">Ver carrinho</span>
+    <span class="cart-bar-total">R$ 0,00</span>
+  </button>
+
+  <!-- Menu inferior (mobile) -->
+  <nav class="bottom-nav" aria-label="Menu principal">
+    <button type="button" class="nav-btn active" data-nav="inicio" data-go="inicio">
+      <i class="fas fa-home" aria-hidden="true"></i><span>Início</span>
     </button>
-    <button class="nav-btn" data-nav="carrinho" onclick="go('carrinho')">
-      <i class="fas fa-shopping-bag"></i><span>Carrinho</span>
+    <button type="button" class="nav-btn" data-nav="carrinho" data-go="carrinho">
+      <i class="fas fa-shopping-bag" aria-hidden="true"></i><span>Carrinho</span>
       <span id="cart-badge-mobile" class="badge" hidden>0</span>
     </button>
-    <!-- E adicione dentro da <nav class="bottom-nav">: -->
-    <button class="nav-btn" data-nav="cadastrar" onclick="go('cadastrar')">
-        <i class="fas fa-plus-circle"></i><span>Loja</span>
+    <button type="button" class="nav-btn" data-nav="cadastrar" data-go="cadastrar">
+      <i class="fas fa-plus-circle" aria-hidden="true"></i><span>Loja</span>
     </button>
-    <button class="nav-btn" data-nav="pedido" onclick="go('pedido')">
-      <i class="fas fa-receipt"></i><span>Pedido</span>
+    <button type="button" class="nav-btn" data-nav="pedido" data-go="pedido">
+      <i class="fas fa-receipt" aria-hidden="true"></i><span>Pedido</span>
     </button>
   </nav>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/app.js"></script>
+  <!-- Confirmação (usada por askConfirm) -->
+  <dialog id="confirm-dialog" class="dialog" aria-labelledby="dlg-title">
+    <form method="dialog">
+      <h2 id="dlg-title" data-dlg-title></h2>
+      <p class="muted" data-dlg-text></p>
+      <div class="dialog-actions">
+        <button value="cancel" class="btn-big btn-big-ghost btn-big-sm" data-dlg-cancel autofocus>Cancelar</button>
+        <button value="ok" class="btn-big btn-big-primary btn-big-sm" data-dlg-ok>Confirmar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="js/config.js"></script>
+  <script defer src="js/auth.js"></script>
+  <script defer src="js/app.js"></script>
 </body>
 </html>
