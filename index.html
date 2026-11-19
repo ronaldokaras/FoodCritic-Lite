@@ -35,13 +35,14 @@
         <button type="button" class="nav-btn" data-nav="pedido" data-go="pedido">
           <i class="fas fa-receipt" aria-hidden="true"></i> <span>Meu Pedido</span>
         </button>
-        <button type="button" class="nav-btn" data-nav="cadastrar" data-go="cadastrar">
-          <i class="fas fa-plus-circle" aria-hidden="true"></i> <span>Nova Loja</span>
-        </button>
       </nav>
-      <button type="button" class="btn-logout-sidebar" data-action="logout">
-        <i class="fas fa-sign-out-alt" aria-hidden="true"></i> <span>Sair</span>
-      </button>
+      <div class="sidebar-left-footer">
+        <div id="sidebar-left-profile" class="sidebar-left-profile"></div>
+        <button type="button" class="btn-logout-sidebar" data-action="logout">
+          <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+          <span>Sair da conta</span>
+        </button>
+      </div>
     </aside>
 
     <!-- Conteúdo -->
@@ -51,10 +52,7 @@
       </div>
     </main>
 
-    <!-- Resumo (desktop) -->
-    <aside class="sidebar-right" aria-label="Resumo">
-      <div id="sidebar-right-content"></div>
-    </aside>
+    <!-- Perfil no desktop fica na sidebar esquerda -->
   </div>
 
   <!-- Carrinho flutuante (mobile) -->
@@ -73,11 +71,11 @@
       <i class="fas fa-shopping-bag" aria-hidden="true"></i><span>Carrinho</span>
       <span id="cart-badge-mobile" class="badge" hidden>0</span>
     </button>
-    <button type="button" class="nav-btn" data-nav="cadastrar" data-go="cadastrar">
-      <i class="fas fa-plus-circle" aria-hidden="true"></i><span>Loja</span>
-    </button>
     <button type="button" class="nav-btn" data-nav="pedido" data-go="pedido">
       <i class="fas fa-receipt" aria-hidden="true"></i><span>Pedido</span>
+    </button>
+    <button type="button" class="nav-btn nav-btn-logout" data-action="logout">
+      <i class="fas fa-sign-out-alt" aria-hidden="true"></i><span>Sair</span>
     </button>
   </nav>
 

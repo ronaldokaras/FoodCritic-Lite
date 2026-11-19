@@ -126,18 +126,25 @@ body.text-large .bottom-nav .nav-btn { font-size: 13px; }
 .header-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .header-row .logo-small { margin-bottom: 10px; }
 .btn-account {
-  width: 44px; height: 44px;
-  display: grid; place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
   margin-top: -8px;
-  background: var(--paper);
-  border: 1.5px solid var(--line);
-  border-radius: 50%;
-  color: var(--ink-muted);
-  font-size: 18px;
+  background: var(--danger-light);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-pill);
+  color: var(--danger);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.btn-account:hover { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+.btn-account:hover { background: #F5D6D3; color: var(--danger); border-color: var(--danger); }
+.btn-account i { font-size: 15px; }
 
 /* ---------- 4. BARRA DO CARRINHO ("comanda flutuante") ---------- */
 .cart-bar {
@@ -183,10 +190,12 @@ body.text-large .bottom-nav .nav-btn { font-size: 13px; }
 }
 @keyframes sheet-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
 
-body.has-cart-bar { padding-bottom: calc(var(--nav-h) + var(--safe-b) + 84px); }
+body.has-cart-bar { padding-bottom: calc(var(--nav-h) + var(--safe-b) + 120px); }
 @media (min-width: 900px) {
-  .cart-bar { display: none; }                /* no desktop o carrinho já fica na lateral */
+  .cart-bar { display: none; }
   body.has-cart-bar { padding-bottom: 0; }
+  body { padding-bottom: 0 !important; }
+  #view-content::after { display: none !important; }
 }
 
 /* ---------- 5. BOTÃO FIXO DE AÇÃO (checkout) ---------- */
@@ -469,13 +478,22 @@ img.is-broken {
   background-position: right 10px center;
 }
 .phone-input-group input {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 auto !important;
+  width: 0 !important;
+  min-width: 0 !important;
   min-height: 54px;
   padding: 14px 16px;
-  border: none;
-  background: transparent;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
   font-size: var(--font-base);
   font-weight: 600;
   outline: none;
+}
+.phone-country-select {
+  width: auto !important;
+  flex: 0 0 118px !important;
+  max-width: 130px;
+  border: none !important;
+  box-shadow: none !important;
 }

@@ -81,6 +81,7 @@
     order: load(KEYS.order, null),
     ticker: null,
     lastStep: null,
+    editingName: false,
   };
 
   const same        = (a, b) => String(a) === String(b);
@@ -308,19 +309,29 @@
   }
 
   function cleanFoodText(text) {
-    return String(text || '').replace(/\[IMG:https?:\/\/[^\]]+\]\s*/gi, '').trim();
+    return String(text || '')
+      .replace(/\[\s*img\s*:\s*[^\]]*\]/gi, '')
+      .replace(/\[IMG:https?:\/\/[^\]]+\]/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
   }
 
   function withFoodPhotos(store) {
     const used = new Set();
     const catId = store.category_id;
-    const cover = takeFoodPhoto(poolKeyFor(`${store.name} ${store.categories?.name || ''}`, catId), store.id, used);
-    const menu_items = (store.menu_items || []).map(m => ({
-      ...m,
-      description: cleanFoodText(m.description),
-      img: takeFoodPhoto(poolKeyFor(`${m.name} ${m.description || ''}`, catId), (Number(m.id) || 0) + 97, used),
-    }));
-    return { ...store, cover, menu_items };
+    const name = cleanFoodText(store.name);
+    const cover = takeFoodPhoto(poolKeyFor(`${name} ${store.categories?.name || ''}`, catId), store.id, used);
+    const menu_items = (store.menu_items || []).map(m => {
+      const mName = cleanFoodText(m.name);
+      const mDesc = cleanFoodText(m.description);
+      return {
+        ...m,
+        name: mName,
+        description: mDesc,
+        img: takeFoodPhoto(poolKeyFor(`${mName} ${mDesc}`, catId), (Number(m.id) || 0) + 97, used),
+      };
+    });
+    return { ...store, name, cover, menu_items };
   }
 
   async function refreshData() {
@@ -368,6 +379,7 @@
     const { view, id } = parseHash();
 
     // guardas de fluxo
+    if (view === 'cadastrar') return redirect('inicio');   // cadastro de loja oculto ao público
     if (view === 'restaurante' && !id) return redirect('inicio');
     if ((view === 'entrega' || view === 'pagamento') && !state.cart.items.length) return redirect('carrinho');
 
@@ -444,8 +456,7 @@
       content.classList.add('view-enter');
     }
 
-    const side = $('sidebar-right-content');
-    if (side) side.innerHTML = renderSidebar();
+    renderLeftProfile();
     updateCartUI();
   }
 
@@ -481,6 +492,7 @@
           <p class="logo-small">FoodCritic Fácil</p>
           <button type="button" class="btn-account only-mobile" data-action="logout" aria-label="Sair da conta">
             <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+            <span>Sair</span>
           </button>
         </div>
         ${h1(`Olá, ${esc(first)}! O que você quer comer?`)}
@@ -648,7 +660,7 @@
               <option value="+54" data-placeholder="(00) 0000-0000">🇦🇷 +54</option>
               <option value="+598" data-placeholder="00 000 000">🇺🇾 +598</option>
             </select>
-            <input id="ad-phone" name="phone_number" type="tel" inputmode="numeric"
+            <input id="ad-phone" name="phone_number" type="tel" inputmode="tel"
                    value="${esc((a.phone || '').replace(/^\+\d{1,3}\s*/, ''))}"
                    placeholder="(00) 00000-0000" autocomplete="tel-national" required>
           </div>
@@ -796,45 +808,73 @@
     return `<img class="avatar" width="48" height="48" alt="" src="${esc(avatarUrl(state.user?.id, state.avatarBust))}" data-fallback="${esc(fb)}">`;
   }
 
-  function renderSidebar() {
-    const profile = state.profile ? `
-      <div class="sidebar-section">
-        <h3 class="sidebar-title">Meu perfil</h3>
+  // Perfil fica só na lateral esquerda (desktop). Sem sidebar direita.
+  function renderLeftProfile() {
+    const box = $('sidebar-left-profile');
+    if (!box) return;
+    if (!state.profile) { box.innerHTML = ''; return; }
+
+    if (state.editingName) {
+      box.innerHTML = `
         <div class="profile-row">${avatarImg()}
-          <div class="profile-info"><strong>${esc(state.profile.full_name)}</strong><span class="muted-small">${esc(state.user?.email)}</span></div>
+          <div class="profile-info">
+            <strong>Editar nome</strong>
+            <span class="muted-small">${esc(state.user?.email || '')}</span>
+          </div>
         </div>
-      </div>` : '';
-
-    if (state.view === 'pedido' && state.order) {
-      const s = STEPS[currentStep(state.order)];
-      return profile + `
-        <div class="sidebar-section">
-          <h3 class="sidebar-title">Pedido atual</h3>
-          <p class="sidebar-sub">${esc(state.order.restaurantName)}</p>
-          <div class="sidebar-status"><i class="fas ${s.icon}" aria-hidden="true"></i><strong>${s.label}</strong></div>
-          <p class="sidebar-hint">${s.desc}</p>
+        <div class="profile-edit-row">
+          <input id="profile-name-input" type="text" maxlength="60" value="${esc(state.profile.full_name || '')}" autocomplete="name">
+          <div class="profile-edit-actions">
+            <button type="button" data-action="cancel-name">Cancelar</button>
+            <button type="button" class="btn-save-name" data-action="save-name">Salvar</button>
+          </div>
         </div>`;
+      requestAnimationFrame(() => $('profile-name-input')?.focus());
+      return;
     }
 
-    if (cartCount() === 0) {
-      return profile + `
-        <div class="sidebar-section">
-          <h3 class="sidebar-title">Seu carrinho</h3>
-          <p class="sidebar-sub">Ainda está vazio.</p>
-          <button type="button" class="btn-big btn-big-primary btn-big-block mt-16" data-go="inicio">Escolher comida</button>
-        </div>`;
-    }
-    return profile + `
-      <div class="sidebar-section">
-        <h3 class="sidebar-title">Seu carrinho</h3>
-        <p class="sidebar-sub">${esc(state.cart.rname)}</p>
-        <div class="sidebar-items">
-          ${state.cart.items.map(i => `<div class="sidebar-item"><span>${i.qty}× ${esc(i.name)}</span><strong>R$ ${money(i.price * i.qty)}</strong></div>`).join('')}
+    box.innerHTML = `
+      <div class="profile-row">${avatarImg()}
+        <div class="profile-info">
+          <strong title="${esc(state.profile.full_name || '')}">${esc(state.profile.full_name || 'Cliente')}</strong>
+          <span class="muted-small" title="${esc(state.user?.email || '')}">${esc(state.user?.email || '')}</span>
         </div>
-        <div class="sidebar-total"><span>Total</span><strong>R$ ${money(cartTotal())}</strong></div>
-        <button type="button" class="btn-big btn-big-primary btn-big-block mt-16" data-go="carrinho">
-          Ver carrinho <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
-      </div>`;
+      </div>
+      <button type="button" class="btn-edit-name" data-action="edit-name">
+        <i class="fas fa-pen" aria-hidden="true"></i> Alterar nome
+      </button>`;
+  }
+
+  function renderSidebar() {
+    // mantido vazio de propósito: a coluna direita foi removida
+    return '';
+  }
+
+  async function saveProfileName() {
+    const input = $('profile-name-input');
+    const name = String(input?.value || '').trim();
+    if (!name) return toast('Digite um nome', 'error');
+    if (!state.user) return toast('Sessão expirada. Entre novamente.', 'error');
+
+    const { error } = await sb.from(T.profiles).upsert({
+      id: state.user.id,
+      full_name: name,
+      role: state.profile?.role || 'user',
+    });
+    if (error) {
+      console.error(error);
+      return toast('Não foi possível salvar o nome', 'error');
+    }
+    try {
+      await sb.auth.updateUser({ data: { full_name: name } });
+    } catch {}
+    state.profile = { ...(state.profile || {}), id: state.user.id, full_name: name };
+    state.editingName = false;
+    state.avatarBust = Date.now();
+    renderLeftProfile();
+    // atualiza saudação se estiver no início
+    if (state.view === 'inicio') render({ enter: false });
+    toast('Nome atualizado!', 'success');
   }
 
   const VIEWS = {
@@ -935,24 +975,39 @@
   }
 
   function maskPhoneInput(input) {
+    if (!input) return;
     const select = $('ad-phone-country');
     const code = select ? select.value : '+55';
-    let digits = input.value.replace(/\D/g, '');
+    const start = input.selectionStart;
+    const before = input.value;
+    let digits = before.replace(/\D/g, '');
+    let next = '';
+
     if (code === '+55') {
       if (digits.length > 11) digits = digits.slice(0, 11);
-      if (digits.length <= 2) input.value = digits.length ? `(${digits}` : '';
-      else if (digits.length <= 6) input.value = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-      else if (digits.length <= 10) input.value = `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-      else input.value = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+      if (digits.length === 0) next = '';
+      else if (digits.length <= 2) next = '(' + digits;
+      else if (digits.length <= 6) next = '(' + digits.slice(0, 2) + ') ' + digits.slice(2);
+      else if (digits.length <= 10) next = '(' + digits.slice(0, 2) + ') ' + digits.slice(2, 6) + '-' + digits.slice(6);
+      else next = '(' + digits.slice(0, 2) + ') ' + digits.slice(2, 7) + '-' + digits.slice(7);
     } else if (code === '+1') {
       if (digits.length > 10) digits = digits.slice(0, 10);
-      if (digits.length <= 3) input.value = digits.length ? `(${digits}` : '';
-      else if (digits.length <= 6) input.value = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-      else input.value = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+      if (digits.length === 0) next = '';
+      else if (digits.length <= 3) next = '(' + digits;
+      else if (digits.length <= 6) next = '(' + digits.slice(0, 3) + ') ' + digits.slice(3);
+      else next = '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6);
     } else {
       if (digits.length > 12) digits = digits.slice(0, 12);
-      input.value = digits.replace(/(\d{3})(?=\d)/g, '$1 ').trim();
+      next = digits;
     }
+
+    if (next === before) return;
+    input.value = next;
+    // tenta manter o cursor perto do final (digitar é sempre à direita)
+    try {
+      const pos = next.length;
+      input.setSelectionRange(pos, pos);
+    } catch {}
   }
 
   function selectPayment(id) {
@@ -1152,12 +1207,25 @@
 
   const ACTIONS = {
     logout: async () => {
-      const ok = await askConfirm({
-        title: 'Sair da conta?',
-        text: 'O carrinho e o endereço salvos neste aparelho serão apagados.',
-        ok: 'Sair', cancel: 'Ficar',
-      });
-      if (ok) logout();
+      let ok = false;
+      try {
+        ok = await askConfirm({
+          title: 'Sair da conta?',
+          text: 'O carrinho e o endereço salvos neste aparelho serão apagados.',
+          ok: 'Sair', cancel: 'Ficar',
+        });
+      } catch {
+        ok = window.confirm('Sair da conta?');
+      }
+      if (!ok) return;
+      if (typeof logout === 'function') {
+        try { await logout(); return; } catch (err) { console.error(err); }
+      }
+      try {
+        ['fc-cart', 'fc-address', 'fc-order'].forEach(k => localStorage.removeItem(k));
+        await sb.auth.signOut();
+      } catch {}
+      location.replace('login.html');
     },
     cuisine: t => setCuisine(t.dataset.id),
     add: t => addToCart(t.dataset.store, t.dataset.id),
@@ -1169,6 +1237,9 @@
     'open-cart': () => go('carrinho'),
     reload: reloadData,
     locate: locateMe,
+    'edit-name': () => { state.editingName = true; renderLeftProfile(); },
+    'cancel-name': () => { state.editingName = false; renderLeftProfile(); },
+    'save-name': () => saveProfileName(),
   };
 
   document.addEventListener('change', e => {
